@@ -3,7 +3,7 @@ export default function Home() {
     <div className="flex min-h-screen items-center justify-center bg-red-50 font-sans">
       <main className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-lg max-w-2xl">
         <h1 className="text-3xl font-bold text-red-600 mb-4">
-          ⚠️ Middleware Not Running
+          ⚠️ Middleware Not Running at all
         </h1>
         <p className="text-lg text-gray-700 text-center mb-4">
           If you see this page, the Next.js middleware is NOT executing.
