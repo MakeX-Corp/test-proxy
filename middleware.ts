@@ -18,9 +18,8 @@ function buildProxyHeaders(
     "accept-encoding": "gzip, deflate, br",
   };
 
-  // Add test cookie
-  headers["cookie"] = "test-cookie=manual-test-value";
-  headers["cookie"] = "test-cookie2=manual-test-value";
+  // Add test cookies (multiple cookies in one header, separated by semicolon)
+  headers["cookie"] = "test-cookie=manual-test-value; test-cookie2=manual-test-value2";
 
   // Add custom test headers
   headers["X-Proxy-Source"] = "nextjs-middleware-proxy";
