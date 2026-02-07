@@ -135,16 +135,19 @@ async function handleProxyResponse(
 async function proxyRequest(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
+  console.log("=== MIDDLEWARE RUNNING ===");
+  console.log("[Middleware] Request:", request.method, pathname);
+  console.log("[Middleware] Host:", request.headers.get("host"));
+
   // Skip Next.js internal routes
   const isNextInternal = pathname.startsWith("/_next/static") ||
                          pathname.startsWith("/_next/image") ||
                          pathname === "/_next/webpack-hmr";
 
   if (isNextInternal) {
+    console.log("[Middleware] Skipping Next.js internal route");
     return NextResponse.next();
   }
-
-  console.log("[Middleware] Request:", request.method, pathname);
 
   // Build the target URL
   const targetUrl = new URL(TARGET_URL);
@@ -166,6 +169,7 @@ export const config = {
     /*
      * Match all request paths except Next.js internals
      */
+    "/",
     "/((?!_next/static|_next/image|_next/webpack-hmr|favicon.ico).*)",
   ],
 };
