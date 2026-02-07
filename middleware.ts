@@ -166,15 +166,8 @@ async function proxyRequest(request: NextRequest) {
   console.log("[Middleware] Host:", request.headers.get("host"));
   console.log("[Middleware] Full URL:", request.url);
 
-  // Skip Next.js internal routes
-  const isNextInternal = pathname.startsWith("/_next/static") ||
-                         pathname.startsWith("/_next/image") ||
-                         pathname === "/_next/webpack-hmr";
-
-  if (isNextInternal) {
-    console.log("[Middleware] Skipping Next.js internal route");
-    return NextResponse.next();
-  }
+  // Don't skip anything - proxy everything including /_next paths
+  // The target site might be a Next.js app with its own /_next assets
 
   // Build the target URL
   const targetUrl = new URL(TARGET_URL);
