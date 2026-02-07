@@ -26,6 +26,9 @@ function buildProxyHeaders(
     headers["cookie"] = testCookie;
   }
 
+  // Add custom test header
+  headers["X-Test-Cookie"] = "test-cookie-value-123";
+
   // Forward authorization header
   const authorization = request.headers.get("authorization");
   if (authorization) {
