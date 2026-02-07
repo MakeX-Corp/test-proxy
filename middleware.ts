@@ -18,19 +18,8 @@ function buildProxyHeaders(
     "accept-encoding": "gzip, deflate, br",
   };
 
-  // Forward cookies - important for authentication
-  const cookie = request.headers.get("cookie");
-  const testCookie = "test-cookie=manual-test-value";
-  headers["cookie"] = `${cookie}; ${testCookie}`;
-  
-
-  // Add custom test headers (match Daytona docs Title-Case)
-  headers["X-Test-Cookie"] = "test-cookie-value-123";
+  // Add custom test headers
   headers["X-Proxy-Source"] = "nextjs-middleware-proxy";
-
-  // Add Daytona-specific headers (EXACT casing from docs)
-  headers["X-Daytona-Skip-Preview-Warning"] = "true";
-  headers["X-Daytona-Disable-CORS"] = "true";
 
   // Forward authorization header
   const authorization = request.headers.get("authorization");
@@ -85,11 +74,7 @@ async function handleProxyResponse(
     console.log("[Middleware] Target URL:", targetUrl.toString());
     console.log("[Middleware] Method:", request.method);
     console.log("[Middleware] Headers being sent to target:");
-    console.log("  - cookie:", headers["cookie"]);
-    console.log("  - X-Test-Cookie:", headers["X-Test-Cookie"]);
     console.log("  - X-Proxy-Source:", headers["X-Proxy-Source"]);
-    console.log("  - X-Daytona-Skip-Preview-Warning:", headers["X-Daytona-Skip-Preview-Warning"]);
-    console.log("  - X-Daytona-Disable-CORS:", headers["X-Daytona-Disable-CORS"]);
     console.log("  - authorization:", headers["authorization"]);
     console.log("[Middleware] All headers:", JSON.stringify(headers, null, 2));
 
@@ -196,10 +181,7 @@ async function proxyRequest(request: NextRequest) {
   const headers = buildProxyHeaders(request, targetUrl.host);
 
   console.log("[Middleware] Custom headers added:");
-  console.log("  - X-Test-Cookie:", headers["X-Test-Cookie"]);
   console.log("  - X-Proxy-Source:", headers["X-Proxy-Source"]);
-  console.log("  - X-Daytona-Skip-Preview-Warning:", headers["X-Daytona-Skip-Preview-Warning"]);
-  console.log("  - X-Daytona-Disable-CORS:", headers["X-Daytona-Disable-CORS"]);
 
   return handleProxyResponse(request, targetUrl, headers);
 }
