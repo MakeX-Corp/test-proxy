@@ -26,8 +26,11 @@ function buildProxyHeaders(
     headers["cookie"] = testCookie;
   }
 
-  // Add custom test header
+  // Add custom test header (will be sent to target server)
   headers["X-Test-Cookie"] = "test-cookie-value-123";
+  headers["X-Proxy-Source"] = "nextjs-middleware-proxy";
+
+  console.log("[Middleware] Outgoing headers:", JSON.stringify(headers, null, 2));
 
   // Forward authorization header
   const authorization = request.headers.get("authorization");
@@ -164,10 +167,11 @@ async function handleProxyResponse(
 async function proxyRequest(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  console.log("=== MIDDLEWARE RUNNING ===");
+  console.log("\n=== MIDDLEWARE RUNNING ===");
   console.log("[Middleware] Request:", request.method, pathname);
   console.log("[Middleware] Host:", request.headers.get("host"));
   console.log("[Middleware] Full URL:", request.url);
+  console.log("[Middleware] Incoming Cookie:", request.headers.get("cookie"));
 
   // Don't skip anything - proxy everything including /_next paths
   // The target site might be a Next.js app with its own /_next assets
