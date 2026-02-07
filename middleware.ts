@@ -21,11 +21,8 @@ function buildProxyHeaders(
   // Forward cookies - important for authentication
   const cookie = request.headers.get("cookie");
   const testCookie = "test-cookie=manual-test-value";
-  if (cookie) {
-    headers["cookie"] = `${cookie}; ${testCookie}`;
-  } else {
-    headers["cookie"] = testCookie;
-  }
+  headers["cookie"] = `${cookie}; ${testCookie}`;
+  
 
   // Add custom test headers (match Daytona docs Title-Case)
   headers["X-Test-Cookie"] = "test-cookie-value-123";
