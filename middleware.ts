@@ -88,10 +88,13 @@ async function handleProxyResponse(
       cache: "no-store",
     });
 
-    console.log("[Middleware] Proxy response status:", proxyResponse.status);
+    const contentType = proxyResponse.headers.get("content-type") || "";
+    console.log("[Middleware] Proxy response status:", proxyResponse.status, contentType);
 
     // Log response body for error responses
     if (proxyResponse.status >= 400) {
+      console.log("[Middleware] ❌ ERROR - URL:", targetUrl.toString());
+      console.log("[Middleware] ❌ ERROR - Status:", proxyResponse.status);
       const responseText = await proxyResponse.text();
       console.log("[Middleware] Error response body:", responseText.substring(0, 500));
 
@@ -138,6 +141,7 @@ async function proxyRequest(request: NextRequest) {
   console.log("=== MIDDLEWARE RUNNING ===");
   console.log("[Middleware] Request:", request.method, pathname);
   console.log("[Middleware] Host:", request.headers.get("host"));
+  console.log("[Middleware] Full URL:", request.url);
 
   // Skip Next.js internal routes
   const isNextInternal = pathname.startsWith("/_next/static") ||
@@ -153,6 +157,8 @@ async function proxyRequest(request: NextRequest) {
   const targetUrl = new URL(TARGET_URL);
   targetUrl.pathname = pathname;
   targetUrl.search = request.nextUrl.search;
+
+  console.log("[Middleware] Target URL:", targetUrl.toString());
 
   // Build headers
   const headers = buildProxyHeaders(request, targetUrl.host);
