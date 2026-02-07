@@ -26,9 +26,13 @@ function buildProxyHeaders(
     headers["cookie"] = testCookie;
   }
 
-  // Add custom test header (will be sent to target server)
+  // Add custom test headers (match Daytona docs Title-Case)
   headers["X-Test-Cookie"] = "test-cookie-value-123";
   headers["X-Proxy-Source"] = "nextjs-middleware-proxy";
+
+  // Add Daytona-specific headers (EXACT casing from docs)
+  headers["X-Daytona-Skip-Preview-Warning"] = "true";
+  headers["X-Daytona-Disable-CORS"] = "true";
 
   // Forward authorization header
   const authorization = request.headers.get("authorization");
@@ -83,10 +87,12 @@ async function handleProxyResponse(
     console.log("[Middleware] Target URL:", targetUrl.toString());
     console.log("[Middleware] Method:", request.method);
     console.log("[Middleware] Headers being sent to target:");
-    console.log("  - Cookie:", headers["cookie"]);
+    console.log("  - cookie:", headers["cookie"]);
     console.log("  - X-Test-Cookie:", headers["X-Test-Cookie"]);
     console.log("  - X-Proxy-Source:", headers["X-Proxy-Source"]);
-    console.log("  - Authorization:", headers["authorization"]);
+    console.log("  - X-Daytona-Skip-Preview-Warning:", headers["X-Daytona-Skip-Preview-Warning"]);
+    console.log("  - X-Daytona-Disable-CORS:", headers["X-Daytona-Disable-CORS"]);
+    console.log("  - authorization:", headers["authorization"]);
     console.log("[Middleware] All headers:", JSON.stringify(headers, null, 2));
 
     const proxyResponse = await fetch(targetUrl.toString(), {
@@ -179,8 +185,9 @@ async function proxyRequest(request: NextRequest) {
   console.log("[Middleware] Path:", pathname);
   console.log("[Middleware] Full URL:", request.url);
   console.log("[Middleware] Host:", request.headers.get("host"));
-  console.log("[Middleware] Incoming Cookie:", request.headers.get("cookie"));
+  console.log("[Middleware] Incoming cookie:", request.headers.get("cookie"));
   console.log("[Middleware] Incoming X-Test-Cookie:", request.headers.get("X-Test-Cookie"));
+  console.log("[Middleware] Incoming X-Daytona-*:", request.headers.get("X-Daytona-Skip-Preview-Warning"));
   console.log("[Middleware] Referer:", request.headers.get("referer"));
 
   // Don't skip anything - proxy everything including /_next paths
@@ -199,6 +206,8 @@ async function proxyRequest(request: NextRequest) {
   console.log("[Middleware] Custom headers added:");
   console.log("  - X-Test-Cookie:", headers["X-Test-Cookie"]);
   console.log("  - X-Proxy-Source:", headers["X-Proxy-Source"]);
+  console.log("  - X-Daytona-Skip-Preview-Warning:", headers["X-Daytona-Skip-Preview-Warning"]);
+  console.log("  - X-Daytona-Disable-CORS:", headers["X-Daytona-Disable-CORS"]);
 
   return handleProxyResponse(request, targetUrl, headers);
 }
