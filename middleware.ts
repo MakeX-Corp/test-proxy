@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const TARGET_URL = "https://3000-48c9f3c7-b83f-4215-a444-62f41932a658.proxy.daytona.works";
+const TARGET_URL = "https://d218db8e030759c9-makex.style.dev";
 
 /**
  * Builds proxy headers for the request
