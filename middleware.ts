@@ -30,8 +30,6 @@ function buildProxyHeaders(
   headers["X-Test-Cookie"] = "test-cookie-value-123";
   headers["X-Proxy-Source"] = "nextjs-middleware-proxy";
 
-  console.log("[Middleware] Outgoing headers:", JSON.stringify(headers, null, 2));
-
   // Forward authorization header
   const authorization = request.headers.get("authorization");
   if (authorization) {
@@ -81,10 +79,15 @@ async function handleProxyResponse(
   headers: Record<string, string>
 ): Promise<NextResponse> {
   try {
-    console.log("[Middleware] Fetching:", {
-      url: targetUrl.toString(),
-      method: request.method,
-    });
+    console.log("\n[Middleware] ===== SENDING REQUEST =====");
+    console.log("[Middleware] Target URL:", targetUrl.toString());
+    console.log("[Middleware] Method:", request.method);
+    console.log("[Middleware] Headers being sent to target:");
+    console.log("  - Cookie:", headers["cookie"]);
+    console.log("  - X-Test-Cookie:", headers["X-Test-Cookie"]);
+    console.log("  - X-Proxy-Source:", headers["X-Proxy-Source"]);
+    console.log("  - Authorization:", headers["authorization"]);
+    console.log("[Middleware] All headers:", JSON.stringify(headers, null, 2));
 
     const proxyResponse = await fetch(targetUrl.toString(), {
       method: request.method,
@@ -93,6 +96,8 @@ async function handleProxyResponse(
       redirect: "manual",
       cache: "no-store",
     });
+
+    console.log("[Middleware] ===== RESPONSE RECEIVED =====");
 
     const contentType = proxyResponse.headers.get("content-type") || "";
     console.log("[Middleware] Proxy response status:", proxyResponse.status, contentType);
@@ -167,11 +172,16 @@ async function handleProxyResponse(
 async function proxyRequest(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  console.log("\n=== MIDDLEWARE RUNNING ===");
-  console.log("[Middleware] Request:", request.method, pathname);
-  console.log("[Middleware] Host:", request.headers.get("host"));
+  console.log("\n========================================");
+  console.log("=== MIDDLEWARE INTERCEPTED REQUEST ===");
+  console.log("========================================");
+  console.log("[Middleware] Method:", request.method);
+  console.log("[Middleware] Path:", pathname);
   console.log("[Middleware] Full URL:", request.url);
+  console.log("[Middleware] Host:", request.headers.get("host"));
   console.log("[Middleware] Incoming Cookie:", request.headers.get("cookie"));
+  console.log("[Middleware] Incoming X-Test-Cookie:", request.headers.get("X-Test-Cookie"));
+  console.log("[Middleware] Referer:", request.headers.get("referer"));
 
   // Don't skip anything - proxy everything including /_next paths
   // The target site might be a Next.js app with its own /_next assets
@@ -181,10 +191,14 @@ async function proxyRequest(request: NextRequest) {
   targetUrl.pathname = pathname;
   targetUrl.search = request.nextUrl.search;
 
-  console.log("[Middleware] Target URL:", targetUrl.toString());
+  console.log("[Middleware] Will proxy to:", targetUrl.toString());
 
   // Build headers
   const headers = buildProxyHeaders(request, targetUrl.host);
+
+  console.log("[Middleware] Custom headers added:");
+  console.log("  - X-Test-Cookie:", headers["X-Test-Cookie"]);
+  console.log("  - X-Proxy-Source:", headers["X-Proxy-Source"]);
 
   return handleProxyResponse(request, targetUrl, headers);
 }
