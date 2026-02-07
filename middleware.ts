@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+// All requests (both vercel.app and *.makex.app) proxy to this target
 const TARGET_URL = "https://d218db8e030759c9-makex.style.dev";
 
 /**
@@ -177,6 +178,7 @@ async function handleProxyResponse(
 
 async function proxyRequest(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const hostname = request.headers.get("host") || "";
 
   console.log("\n========================================");
   console.log("=== MIDDLEWARE INTERCEPTED REQUEST ===");
@@ -184,16 +186,9 @@ async function proxyRequest(request: NextRequest) {
   console.log("[Middleware] Method:", request.method);
   console.log("[Middleware] Path:", pathname);
   console.log("[Middleware] Full URL:", request.url);
-  console.log("[Middleware] Host:", request.headers.get("host"));
-  console.log("[Middleware] Incoming cookie:", request.headers.get("cookie"));
-  console.log("[Middleware] Incoming X-Test-Cookie:", request.headers.get("X-Test-Cookie"));
-  console.log("[Middleware] Incoming X-Daytona-*:", request.headers.get("X-Daytona-Skip-Preview-Warning"));
-  console.log("[Middleware] Referer:", request.headers.get("referer"));
+  console.log("[Middleware] Host:", hostname);
 
-  // Don't skip anything - proxy everything including /_next paths
-  // The target site might be a Next.js app with its own /_next assets
-
-  // Build the target URL
+  // Build the target URL - ALL domains proxy to same target
   const targetUrl = new URL(TARGET_URL);
   targetUrl.pathname = pathname;
   targetUrl.search = request.nextUrl.search;
