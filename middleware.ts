@@ -122,6 +122,26 @@ async function handleProxyResponse(
     responseHeaders.delete("content-encoding");
     responseHeaders.delete("transfer-encoding");
 
+    // For Vercel Edge runtime, buffer all static assets
+    // This fixes issues with CSS, images, and fonts not loading
+    const contentType = proxyResponse.headers.get("content-type") || "";
+    const shouldBuffer = contentType.includes("image/") ||
+                         contentType.includes("font/") ||
+                         contentType.includes("css") ||
+                         contentType.includes("javascript") ||
+                         contentType.includes("octet-stream");
+
+    if (shouldBuffer) {
+      console.log("[Middleware] Buffering asset:", contentType);
+      const buffer = await proxyResponse.arrayBuffer();
+      return new NextResponse(buffer, {
+        status: proxyResponse.status,
+        statusText: proxyResponse.statusText,
+        headers: responseHeaders,
+      });
+    }
+
+    // For HTML and other text content, use body stream
     const response = new NextResponse(proxyResponse.body, {
       status: proxyResponse.status,
       statusText: proxyResponse.statusText,
@@ -176,6 +196,6 @@ export const config = {
      * Match all request paths except Next.js internals
      */
     "/",
-    "/((?!_next/static|_next/image|_next/webpack-hmr|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|_next/webpack-hmr|favicon.ico).*)",
   ],
 };
