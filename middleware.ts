@@ -18,8 +18,39 @@ function buildProxyHeaders(
     "accept-encoding": "gzip, deflate, br",
   };
 
-  // Add test cookie
-  headers["cookie"] = "test-cookie=manual-test-value";
+  // Extract sb- cookies from incoming request
+  const incomingCookies = request.headers.get("cookie") || "";
+  const sbCookies: string[] = [];
+  
+  if (incomingCookies) {
+    console.log("[Middleware] Incoming cookies:", incomingCookies);
+    // Parse cookies and filter for sb- prefixed ones
+    const cookiePairs = incomingCookies.split(";").map(c => c.trim());
+    for (const cookiePair of cookiePairs) {
+      const [name] = cookiePair.split("=");
+      if (name && name.trim().startsWith("sb-")) {
+        sbCookies.push(cookiePair);
+      }
+    }
+    
+    if (sbCookies.length > 0) {
+      console.log("[Middleware] ✓ Extracted sb- cookies:", sbCookies.join(", "));
+    } else {
+      console.log("[Middleware] ⚠ No sb- cookies found in incoming request");
+    }
+  } else {
+    console.log("[Middleware] ⚠ No cookies in incoming request");
+  }
+  
+  // Build cookie header with sb- cookies
+  const cookieParts: string[] = [];
+  if (sbCookies.length > 0) {
+    cookieParts.push(...sbCookies);
+  }
+  cookieParts.push("test-cookie=manual-test-value");
+  
+  headers["cookie"] = cookieParts.join("; ");
+  console.log("[Middleware] Final cookie header:", headers["cookie"]);
 
   // Add custom test headers
   headers["X-Proxy-Source"] = "nextjs-middleware-proxy";
