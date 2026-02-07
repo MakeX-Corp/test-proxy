@@ -18,6 +18,9 @@ function buildProxyHeaders(
     "accept-encoding": "gzip, deflate, br",
   };
 
+  // Add test cookie
+  headers["cookie"] = "test-cookie=manual-test-value";
+
   // Add custom test headers
   headers["X-Proxy-Source"] = "nextjs-middleware-proxy";
 
@@ -74,6 +77,7 @@ async function handleProxyResponse(
     console.log("[Middleware] Target URL:", targetUrl.toString());
     console.log("[Middleware] Method:", request.method);
     console.log("[Middleware] Headers being sent to target:");
+    console.log("  - cookie:", headers["cookie"]);
     console.log("  - X-Proxy-Source:", headers["X-Proxy-Source"]);
     console.log("  - authorization:", headers["authorization"]);
     console.log("[Middleware] All headers:", JSON.stringify(headers, null, 2));
@@ -181,6 +185,7 @@ async function proxyRequest(request: NextRequest) {
   const headers = buildProxyHeaders(request, targetUrl.host);
 
   console.log("[Middleware] Custom headers added:");
+  console.log("  - cookie:", headers["cookie"]);
   console.log("  - X-Proxy-Source:", headers["X-Proxy-Source"]);
 
   return handleProxyResponse(request, targetUrl, headers);
